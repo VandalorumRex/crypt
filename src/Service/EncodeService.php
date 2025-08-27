@@ -20,9 +20,8 @@ class EncodeService
      * @param string $keyName
      * @return string
      */
-    public function hkdf(string $keyName): string
+    public function mediaKeyExpanded(string $keyName): string
     {
-        //$inputKey = file_get_contents(ROOT . '/keys/' . $keyName);
         $inputKey = random_bytes(32);
         $salt = random_bytes(16);
         $encryptionKey = hash_hkdf('sha256', $inputKey, 112, 'aes-256-encryption', $salt);
@@ -30,5 +29,27 @@ class EncodeService
         file_put_contents(ROOT . '/keys/' . $keyName . '.hkdf', $encryptionKey);
 
         return $encryptionKey;
+    }
+
+    /**
+     * Расщепление
+     *
+     * @param string $keyName
+     * @return array<string, string>
+     */
+    public function split(string $keyName): array
+    {
+        $encryptionKey = file_get_contents(ROOT . '/keys/' . $keyName . '.hkdf');
+        if (!$encryptionKey) {
+            $encryptionKey = $this->mediaKeyExpanded($keyName);
+        }
+        $result = [
+            'iv' => substr($encryptionKey, 0, 16),
+            'cipherKey' => substr($encryptionKey, 16, 32),
+            'macKey' => substr($encryptionKey, 48, 32),
+            'refKey' => substr($encryptionKey, 80),
+        ];
+
+        return $result;
     }
 }

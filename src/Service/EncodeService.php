@@ -6,6 +6,8 @@ declare(strict_types=1);
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
  */
 namespace App\Service;
+
+use App\Model\Entity\Dto\MediaKeyExpanded;
 use App\Model\Entity\Enum\MediaType;
 /**
  * Description of EncodeService
@@ -18,9 +20,10 @@ class EncodeService
      * Формирует HKDF-ключ из исходного ключа
      *
      * @param string $keyName
+     * @param 'audio'|'document'|'image'|'video' $type
      * @return string
      */
-    public function mediaKeyExpanded(string $keyName, string $type): string
+    public function hkdf(string $keyName, string $type): string
     {
         $inputKey = random_bytes(32);
         $salt = random_bytes(16);
@@ -36,20 +39,16 @@ class EncodeService
      * Расщепление
      *
      * @param string $keyName
-     * @return array<string, string>
+     * @param 'audio'|'document'|'image'|'video' $type
+     * @return \App\Model\Entity\Dto\MediaKeyExpanded
      */
-    public function split(string $keyName, string $type): array
+    public function split(string $keyName, string $type): MediaKeyExpanded
     {
         $encryptionKey = file_get_contents(ROOT . '/keys/' . $keyName . '.hkdf');
         if (!$encryptionKey) {
-            $encryptionKey = $this->mediaKeyExpanded($keyName, $type);
+            $encryptionKey = $this->hkdf($keyName, $type);
         }
-        $result = [
-            'iv' => substr($encryptionKey, 0, 16),
-            'cipherKey' => substr($encryptionKey, 16, 32),
-            'macKey' => substr($encryptionKey, 48, 32),
-            'refKey' => substr($encryptionKey, 80),
-        ];
+        $result = new MediaKeyExpanded($encryptionKey);
 
         return $result;
     }

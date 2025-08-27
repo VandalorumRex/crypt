@@ -22,15 +22,16 @@ use Cake\Console\ConsoleIo;
  */
 class EncodeCommand extends Command
 {
+    protected EncodeService $encode;
     /**
      * Конструктор
      *
-     * @param \App\Service\EncodeService $encode
      * @param \Cake\Console\CommandFactoryInterface|null $factory
      */
-    public function __construct(protected EncodeService $encode, ?CommandFactoryInterface $factory = null)
+    public function __construct(?CommandFactoryInterface $factory = null)
     {
         parent::__construct($factory);
+        $this->encode = new EncodeService();
     }
 
     /**

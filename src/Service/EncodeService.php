@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
  */
 namespace App\Service;
-
+use App\Model\Entity\Enum\MediaType;
 /**
  * Description of EncodeService
  *
@@ -24,7 +24,8 @@ class EncodeService
     {
         $inputKey = random_bytes(32);
         $salt = random_bytes(16);
-        $encryptionKey = hash_hkdf('sha256', $inputKey, 112, $type, $salt);
+        $mediaType = MediaType::from($type);
+        $encryptionKey = hash_hkdf('sha256', $inputKey, 112, $mediaType->applicationInfo(), $salt);
         file_put_contents(ROOT . '/keys/' . $keyName . '.key', $inputKey);
         file_put_contents(ROOT . '/keys/' . $keyName . '.hkdf', $encryptionKey);
 

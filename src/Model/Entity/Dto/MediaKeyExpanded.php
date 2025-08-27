@@ -65,4 +65,19 @@ class MediaKeyExpanded
 
         return $finalEncryptedContent; // Encryption successful
     }
+
+    public function mac(string $data_to_sign = ''): string
+    {
+        /*if (!$data_to_sign) {
+            $data_to_sign = $iv . $enc;
+        }*/
+        // 2. Generate HMAC-SHA256
+        // The 'true' argument ensures raw binary output, which is generally preferred for cryptographic operations.
+        $hmac_full = hash_hmac('sha256', $data_to_sign, $this->macKey, true);
+
+        // 3. Extract the first 10 bytes as mac
+        $mac = substr($hmac_full, 0, 10);
+
+        return $mac;
+    }
 }

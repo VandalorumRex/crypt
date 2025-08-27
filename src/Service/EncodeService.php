@@ -61,4 +61,13 @@ class EncodeService
         $split = new MediaKeyExpanded($encryptionKey);
         return $split->encryptFileAESCBC($inputFile, $inputFile . '.enc');
     }
+
+    /**public function mac(string $inputFile, string $keyName, string $type) {
+        $encryptionKey = file_get_contents(ROOT . '/keys/' . $keyName . '.hkdf');
+        if (!$encryptionKey) {
+            $encryptionKey = $this->hkdf($keyName, $type);
+        }
+        $split = new MediaKeyExpanded($encryptionKey);
+        return $split->encryptFileAESCBC($inputFile, $inputFile . '.enc');
+    }*/
 }

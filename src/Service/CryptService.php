@@ -130,8 +130,10 @@ class CryptService
         }
         // Remove PKCS#7 padding
         //$unPadded = pkcs7_unpad($plaintext);
-        $unPadded = substr($plaintext, 16);
-        //return $plaintext;
+        //$unPadded = substr($plaintext, 32);
+        $len = strlen($plaintext);
+        $pad = ord($plaintext[$len-1]);
+        $unPadded = substr($plaintext, 0, strlen($plaintext) - $pad);
         $ouputFile = $inputFile . '.decrypted';
         $result = file_put_contents($ouputFile, $unPadded);
         if (!$result) {

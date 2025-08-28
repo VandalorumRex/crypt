@@ -41,10 +41,7 @@ class CryptService
         $salt = '';//random_bytes(16);
         $mediaType = MediaType::from($type);
         $encryptionKey = hash_hkdf('sha256', $inputKey, 112, $mediaType->applicationInfo(), $salt);
-        //if (!$encryptionKey) {
-        //    throw new Exception('Не удалось создать расширенный ключ');
-        //}
-        file_put_contents(ROOT . '/keys/' . $keyName . '.hkdf', $encryptionKey);
+        //file_put_contents(ROOT . '/keys/' . $keyName . '.hkdf', $encryptionKey);
 
         return $encryptionKey;
     }

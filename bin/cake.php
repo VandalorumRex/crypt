@@ -2,8 +2,8 @@
 <?php
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-use App\Application;
 use Cake\Console\CommandRunner;
+use VandalorumRex\Crypt\Application;
 
 // Build the runner with an application and root executable name.
 $runner = new CommandRunner(new Application(dirname(__DIR__) . '/config'), 'cake');

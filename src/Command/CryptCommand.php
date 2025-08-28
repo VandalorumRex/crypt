@@ -30,7 +30,7 @@ class CryptCommand extends Command
     public function __construct(?CommandFactoryInterface $factory = null)
     {
         parent::__construct($factory);
-        $this->crypt = new CryptService();
+        $this->crypt = new Crypt();
     }
 
     /**

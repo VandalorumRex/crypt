@@ -9,20 +9,20 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Service\EncodeService;
+use App\Service\CryptService;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\CommandFactoryInterface;
 use Cake\Console\ConsoleIo;
 
 /**
- * CakePHP EncodeCommand
+ * CakePHP CryptCommand
  *
  * @author Mansur
  */
-class EncodeCommand extends Command
+class CryptCommand extends Command
 {
-    protected EncodeService $encode;
+    protected CryptService $crypt;
     /**
      * Конструктор
      *
@@ -31,7 +31,7 @@ class EncodeCommand extends Command
     public function __construct(?CommandFactoryInterface $factory = null)
     {
         parent::__construct($factory);
-        $this->encode = new EncodeService();
+        $this->crypt = new CryptService();
     }
 
     /**
@@ -44,15 +44,15 @@ class EncodeCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io): int
     {
         if ($args->getArgumentAt(4) !== null) {
-            $result = $this->encode->{$args->getArgumentAt(0)}($args->getArgumentAt(1), $args->getArgumentAt(2), $args->getArgumentAt(3), $args->getArgumentAt(4));
+            $result = $this->crypt->{$args->getArgumentAt(0)}($args->getArgumentAt(1), $args->getArgumentAt(2), $args->getArgumentAt(3), $args->getArgumentAt(4));
         } elseif ($args->getArgumentAt(3) !== null) {
-            $result = $this->encode->{$args->getArgumentAt(0)}($args->getArgumentAt(1), $args->getArgumentAt(2), $args->getArgumentAt(3));
+            $result = $this->crypt->{$args->getArgumentAt(0)}($args->getArgumentAt(1), $args->getArgumentAt(2), $args->getArgumentAt(3));
         } elseif ($args->getArgumentAt(2) !== null) {
-            $result = $this->encode->{$args->getArgumentAt(0)}($args->getArgumentAt(1), $args->getArgumentAt(2));
+            $result = $this->crypt->{$args->getArgumentAt(0)}($args->getArgumentAt(1), $args->getArgumentAt(2));
         } elseif ($args->getArgumentAt(1) !== null) {
-            $result = $this->encode->{$args->getArgumentAt(0)}($args->getArgumentAt(1));
+            $result = $this->crypt->{$args->getArgumentAt(0)}($args->getArgumentAt(1));
         } else {
-            $result = $this->encode->{$args->getArgumentAt(0)}();
+            $result = $this->crypt->{$args->getArgumentAt(0)}();
         }
         print_r($result);
 

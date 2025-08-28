@@ -12,11 +12,11 @@ use App\Model\Entity\Enum\MediaType;
 use Exception;
 
 /**
- * Description of EncodeService
+ * Description of CryptService
  *
  * @author Mansur
  */
-class EncodeService
+class CryptService
 {
     /**
      * Формирует HKDF-ключ из исходного ключа
@@ -55,10 +55,10 @@ class EncodeService
      * @param string $inputFile
      * @param string $keyName
      * @param 'audio'|'document'|'image'|'video' $type
-     * @return int
+     * @return string Путь к зашифрованному файлу
      * @throws \Exception
      */
-    public function file(string $inputFile, string $keyName, string $type): int
+    public function encryptFile(string $inputFile, string $keyName, string $type): string
     {
         if (file_exists($inputFile)) {
             $data = file_get_contents($inputFile);
@@ -88,11 +88,12 @@ class EncodeService
 
         // Склеиваем enc + mac
         $join = $enc . $mac;
-        $result = file_put_contents($inputFile . '. encrypted', $join);
+        $ouputFile = $inputFile . '.encrypted';
+        $result = file_put_contents($ouputFile, $join);
         if (!$result) {
             throw new Exception('Не удалось создать шифрованный файл');
         }
 
-        return $result;
+        return $ouputFile;
     }
 }

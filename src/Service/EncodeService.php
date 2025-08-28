@@ -9,6 +9,8 @@ namespace App\Service;
 
 use App\Model\Entity\Dto\MediaKeyExpanded;
 use App\Model\Entity\Enum\MediaType;
+use Exception;
+
 /**
  * Description of EncodeService
  *
@@ -22,52 +24,75 @@ class EncodeService
      * @param string $keyName
      * @param 'audio'|'document'|'image'|'video' $type
      * @return string
+     * @throws \Exception
      */
     public function hkdf(string $keyName, string $type): string
     {
-        $inputKey = random_bytes(32);
-        $salt = random_bytes(16);
+        $keyPath = ROOT . '/keys/' . $keyName . '.key';
+        if (file_exists($keyPath)) {
+            $inputKey = file_get_contents($keyPath);
+        } else {
+            $inputKey = random_bytes(32);
+            file_put_contents(ROOT . '/keys/' . $keyName . '.key', $inputKey);
+        }
+        if (!$inputKey) {
+            throw new Exception('Не удалось создать ключ');
+        }
+        $salt = '';//random_bytes(16);
         $mediaType = MediaType::from($type);
         $encryptionKey = hash_hkdf('sha256', $inputKey, 112, $mediaType->applicationInfo(), $salt);
-        file_put_contents(ROOT . '/keys/' . $keyName . '.key', $inputKey);
+        //if (!$encryptionKey) {
+        //    throw new Exception('Не удалось создать расширенный ключ');
+        //}
         file_put_contents(ROOT . '/keys/' . $keyName . '.hkdf', $encryptionKey);
 
         return $encryptionKey;
     }
 
     /**
-     * Расщепление
+     * Шифруем файл
      *
+     * @param string $inputFile
      * @param string $keyName
      * @param 'audio'|'document'|'image'|'video' $type
-     * @return \App\Model\Entity\Dto\MediaKeyExpanded
+     * @return int
+     * @throws \Exception
      */
-    public function split(string $keyName, string $type): MediaKeyExpanded
+    public function file(string $inputFile, string $keyName, string $type): int
     {
-        $encryptionKey = file_get_contents(ROOT . '/keys/' . $keyName . '.hkdf');
-        if (!$encryptionKey) {
+        if (file_exists($inputFile)) {
+            $data = file_get_contents($inputFile);
+        } else {
+            throw new Exception('Нет файла');
+        }
+        if ($data === false) {
+            throw new Exception('Нет удалось получить данные');
+        }
+        $hkdfPath = ROOT . '/keys/' . $keyName . '.hkdf';
+        if (file_exists($hkdfPath)) {
+            $encryptionKey = file_get_contents($hkdfPath);
+        } else {
             $encryptionKey = $this->hkdf($keyName, $type);
         }
-        $result = new MediaKeyExpanded($encryptionKey);
+        if (!$encryptionKey) {
+            throw new Exception('Не удалось получить расширенный ключ');
+        }
+        $mediaKeyExpanded = new MediaKeyExpanded($encryptionKey);
+
+        // Шифруем AES-CBC (с PKCS7 padding встроено в openssl_encrypt)
+        $enc = openssl_encrypt($data, 'AES-256-CBC', $mediaKeyExpanded->cipherKey, OPENSSL_RAW_DATA, $mediaKeyExpanded->iv);
+
+        // Подписываем iv + enc
+        $macFull = hash_hmac('sha256', $mediaKeyExpanded->iv . $enc, $mediaKeyExpanded->macKey, true);
+        $mac = substr($macFull, 0, 10);
+
+        // Склеиваем enc + mac
+        $join = $enc . $mac;
+        $result = file_put_contents($inputFile . '. encrypted', $join);
+        if (!$result) {
+            throw new Exception('Не удалось создать шифрованный файл');
+        }
 
         return $result;
     }
-
-    public function encrypt(string $inputFile, string $keyName, string $type) {
-        $encryptionKey = file_get_contents(ROOT . '/keys/' . $keyName . '.hkdf');
-        if (!$encryptionKey) {
-            $encryptionKey = $this->hkdf($keyName, $type);
-        }
-        $split = new MediaKeyExpanded($encryptionKey);
-        return $split->encryptFileAESCBC($inputFile, $inputFile . '.enc');
-    }
-
-    /**public function mac(string $inputFile, string $keyName, string $type) {
-        $encryptionKey = file_get_contents(ROOT . '/keys/' . $keyName . '.hkdf');
-        if (!$encryptionKey) {
-            $encryptionKey = $this->hkdf($keyName, $type);
-        }
-        $split = new MediaKeyExpanded($encryptionKey);
-        return $split->encryptFileAESCBC($inputFile, $inputFile . '.enc');
-    }*/
 }

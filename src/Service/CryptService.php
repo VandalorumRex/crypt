@@ -65,12 +65,7 @@ class CryptService
         if ($data === false) {
             throw new Exception('Нет удалось получить данные');
         }
-        $hkdfPath = ROOT . '/keys/' . $keyName . '.hkdf';
-        if (file_exists($hkdfPath)) {
-            $encryptionKey = file_get_contents($hkdfPath);
-        } else {
-            $encryptionKey = $this->hkdf($keyName, $type);
-        }
+        $encryptionKey = $this->hkdf($keyName, $type);
         if (!$encryptionKey) {
             throw new Exception('Не удалось получить расширенный ключ');
         }

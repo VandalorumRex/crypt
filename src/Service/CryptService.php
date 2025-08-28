@@ -88,4 +88,56 @@ class CryptService
 
         return $ouputFile;
     }
+
+    /**
+     * Дэшифруем файл
+     *
+     * @param string $inputFile
+     * @param string $keyName
+     * @param 'audio'|'document'|'image'|'video' $type
+     * @return string
+     * @throws \Exception
+     */
+    public function decryptFile(string $inputFile, string $keyName, string $type): string
+    {
+        $encryptionKey = $this->hkdf($keyName, $type);
+        if (!$encryptionKey) {
+            throw new Exception('Не удалось получить расширенный ключ');
+        }
+        $mediaKeyExpanded = new MediaKeyExpanded($encryptionKey);
+        $mediaData = file_get_contents($inputFile);
+        if ($mediaData === false) {
+            throw new Exception('Не удалось получить данные из файла');
+        }
+        $file = substr($mediaData, 0, -10);
+        $mac = substr($mediaData, -10);
+        //Validate HMAC-SHA256(macKey, iv + file) and compare first 10 bytes
+        $hmacFull = hash_hmac('sha256', $mediaKeyExpanded->iv . $file, $mediaKeyExpanded->macKey, true);
+        $hmac = substr($hmacFull, 0, 10);
+        if (!hash_equals($hmac, $mac)) {
+            throw new Exception('MAC verification failed');
+        }
+        // 6. Decrypt file with AES-CBC using cipherKey and iv, then unpad
+        $plaintext = openssl_decrypt(
+            $file,
+            'AES-256-CBC',
+            $mediaKeyExpanded->cipherKey,
+            OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
+            $mediaKeyExpanded->iv,
+        );
+        if ($plaintext === false) {
+            throw new Exception('OpenSSL decryption failed');
+        }
+        // Remove PKCS#7 padding
+        //$unPadded = pkcs7_unpad($plaintext);
+        $unPadded = substr($plaintext, 16);
+        //return $plaintext;
+        $ouputFile = $inputFile . '.decrypted';
+        $result = file_put_contents($ouputFile, $unPadded);
+        if (!$result) {
+            throw new Exception('Не удалось создать дэшифрованный файл');
+        }
+
+        return $ouputFile;
+    }
 }

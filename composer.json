@@ -1,15 +1,20 @@
 {
-    "name": "cakephp/app",
-    "description": "CakePHP skeleton app",
+    "name": "vandalorumrex/crypt",
+    "description": "Класс, который шифрует и расшифровывает файлы по алгоритмам, используемым WhatsApp",
     "license": "MIT",
-    "type": "project",
-    "homepage": "https://cakephp.org",
+    "type": "library",
+    "homepage": "https://github.com/vandalorumrex/crypt",
+    "authors": [
+        {
+            "name": "Мансур Усманов",
+            "email": "vandalorumrex@gmail.com"
+        }
+    ],
     "require": {
         "php": ">=8.1",
         "cakephp/cakephp": "5.2.*",
         "cakephp/migrations": "^4.0.0",
-        "cakephp/plugin-installer": "^2.0",
-        "mobiledetect/mobiledetectlib": "^4.8.03"
+        "cakephp/plugin-installer": "^2.0"
     },
     "require-dev": {
         "cakephp/bake": "^3.0.0",

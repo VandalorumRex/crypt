@@ -53,3 +53,6 @@ yarn-debug.log
 yarn-error.log
 
 keys/*
+!keys/AUDIO.key
+!keys/IMAGE.key
+!keys/VIDEO.key

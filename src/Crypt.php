@@ -5,18 +5,19 @@ declare(strict_types=1);
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
  */
-namespace App\Service;
+namespace VandalorumRex\Crypt;
 
-use App\Model\Entity\Dto\MediaKeyExpanded;
-use App\Model\Entity\Enum\MediaType;
 use Exception;
+use VandalorumRex\Crypt\Model\Entity\Dto\MediaKeyExpanded;
+use VandalorumRex\Crypt\Model\Entity\Enum\MediaType;
+
 
 /**
- * Description of CryptService
+ * Description of Crypt
  *
  * @author Mansur
  */
-class CryptService
+class Crypt
 {
     /**
      * Формирует HKDF-ключ из исходного ключа

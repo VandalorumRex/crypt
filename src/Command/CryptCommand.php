@@ -7,14 +7,13 @@ declare(strict_types=1);
  * and open the template in the editor.
  */
 
-namespace App\Command;
+namespace VandalorumRex\Crypt\Command;
 
-use App\Service\CryptService;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\CommandFactoryInterface;
 use Cake\Console\ConsoleIo;
-
+use VandalorumRex\Crypt\Crypt;
 /**
  * CakePHP CryptCommand
  *
@@ -22,7 +21,7 @@ use Cake\Console\ConsoleIo;
  */
 class CryptCommand extends Command
 {
-    protected CryptService $crypt;
+    protected Crypt $crypt;
     /**
      * Конструктор
      *

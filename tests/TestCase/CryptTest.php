@@ -28,4 +28,17 @@ class CryptTest extends TestCase
         $hkdf2 = $crypt->hkdf('test', 'test');
         $this->assertArrayHasKey('error', $hkdf2);
     }
+
+    public function testEncryptFile(): void
+    {
+        $originalTestFile = ROOT . '/tmp/IMAGE.original';
+        // Помещаем оригинал во временную папку для тестов
+        copy(ROOT . '/samples/IMAGE.original', $originalTestFile);
+        $crypt = new Crypt();
+        /** @var string $testEncryptedFile */
+        $testEncryptedFile = $crypt->encryptFile($originalTestFile, 'IMAGE', 'image');
+        $sampleEncryptedText = file_get_contents(ROOT . '/samples/IMAGE.encrypted');
+        $testEncryptedText = file_get_contents($testEncryptedFile);
+        $this->assertEquals($sampleEncryptedText, $testEncryptedText);
+    }
 }

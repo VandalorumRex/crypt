@@ -7,7 +7,8 @@
     "authors": [
         {
             "name": "Мансур Усманов",
-            "email": "vandalorumrex@gmail.com"
+            "homepage": "https://github.com/VandalorumRex",
+            "role": "Author"
         }
     ],
     "require": {

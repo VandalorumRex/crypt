@@ -6,9 +6,6 @@
 * `*.encrypted` - зашифрованный файл;
 * `*.sidecar` - информация для стриминга.
 
-В качестве задания со звёздочкой можно реализовать генерацию информации для стриминга.
-Эта генерация не должна делать дополнительных чтений из потока-исходника.
-
 ## Шифрование
 
 1. Generate your own `mediaKey`, which needs to be 32 bytes, or use an existing one when available.
@@ -36,3 +33,7 @@
 	- `mac`: `mediaData[-10:]`
 5. Validate media data with HMAC by signing `iv + file` with `macKey` using SHA-256. Take in mind that `mac` is truncated to 10 bytes, so you should compare only the first 10 bytes.
 6. Decrypt `file` with AES-CBC using `cipherKey` and `iv`, and unpad it to obtain the result.
+
+## Установка
+
+composer require vandalorumrex/crypt

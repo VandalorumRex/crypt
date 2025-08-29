@@ -41,4 +41,17 @@ class CryptTest extends TestCase
         $testEncryptedText = file_get_contents($testEncryptedFile);
         $this->assertEquals($sampleEncryptedText, $testEncryptedText);
     }
+
+    public function testDecryptFile(): void
+    {
+        $encryptedTestFile = ROOT . '/tmp/VIDEO.encrypted';
+        // Помещаем шифрованный файл во временную папку для тестов
+        copy(ROOT . '/samples/VIDEO.encrypted', $encryptedTestFile);
+        $crypt = new Crypt();
+        /** @var string $decryptedTestFile */
+        $decryptedTestFile = $crypt->decryptFile($encryptedTestFile, 'VIDEO', 'video');
+        $sampleOriginalText = file_get_contents(ROOT . '/samples/VIDEO.original');
+        $decryptedTestText = file_get_contents($decryptedTestFile);
+        $this->assertEquals($sampleOriginalText, $decryptedTestText);
+    }
 }

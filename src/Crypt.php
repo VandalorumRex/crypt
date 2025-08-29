@@ -11,7 +11,6 @@ use Exception;
 use VandalorumRex\Crypt\Model\Entity\Dto\MediaKeyExpanded;
 use VandalorumRex\Crypt\Model\Entity\Enum\MediaType;
 
-
 /**
  * Description of Crypt
  *
@@ -23,12 +22,15 @@ class Crypt
      * Формирует HKDF-ключ из исходного ключа
      *
      * @param string $keyName
-     * @param 'audio'|'document'|'image'|'video' $type
-     * @return string
+     * @param string $type
+     * @return array<string, mixed>|string
      * @throws \Exception
      */
-    public function hkdf(string $keyName, string $type): string
+    public function hkdf(string $keyName, string $type): array|string
     {
+        if (!in_array($type, array_column(MediaType::cases(), 'value'))) {
+            return ['error' => Error::KEY_TYPE_INVALID];
+        }
         $keyPath = ROOT . '/keys/' . $keyName . '.key';
         if (file_exists($keyPath)) {
             $inputKey = file_get_contents($keyPath);
@@ -37,9 +39,9 @@ class Crypt
             file_put_contents(ROOT . '/keys/' . $keyName . '.key', $inputKey);
         }
         if (!$inputKey) {
-            throw new Exception('Не удалось создать ключ');
+            return ['error' => Error::FAILED_TO_CREATE_KEY];
         }
-        $salt = '';//random_bytes(16);
+        $salt = '';
         $mediaType = MediaType::from($type);
         $encryptionKey = hash_hkdf('sha256', $inputKey, 112, $mediaType->applicationInfo(), $salt);
         //file_put_contents(ROOT . '/keys/' . $keyName . '.hkdf', $encryptionKey);
@@ -53,10 +55,10 @@ class Crypt
      * @param string $inputFile
      * @param string $keyName
      * @param 'audio'|'document'|'image'|'video' $type
-     * @return string Путь к зашифрованному файлу
+     * @return array<string, mixed>|string Путь к зашифрованному файлу
      * @throws \Exception
      */
-    public function encryptFile(string $inputFile, string $keyName, string $type): string
+    public function encryptFile(string $inputFile, string $keyName, string $type): array|string
     {
         if (file_exists($inputFile)) {
             $data = file_get_contents($inputFile);
@@ -67,8 +69,8 @@ class Crypt
             throw new Exception('Нет удалось получить данные');
         }
         $encryptionKey = $this->hkdf($keyName, $type);
-        if (!$encryptionKey) {
-            throw new Exception('Не удалось получить расширенный ключ');
+        if (is_array($encryptionKey)) {
+            return $encryptionKey;
         }
         $mediaKeyExpanded = new MediaKeyExpanded($encryptionKey);
 
@@ -96,14 +98,14 @@ class Crypt
      * @param string $inputFile
      * @param string $keyName
      * @param 'audio'|'document'|'image'|'video' $type
-     * @return string
+     * @return array<string, mixed>|string
      * @throws \Exception
      */
-    public function decryptFile(string $inputFile, string $keyName, string $type): string
+    public function decryptFile(string $inputFile, string $keyName, string $type): array|string
     {
         $encryptionKey = $this->hkdf($keyName, $type);
-        if (!$encryptionKey) {
-            throw new Exception('Не удалось получить расширенный ключ');
+        if (is_array($encryptionKey)) {
+            return $encryptionKey;
         }
         $mediaKeyExpanded = new MediaKeyExpanded($encryptionKey);
         $mediaData = file_get_contents($inputFile);
@@ -133,7 +135,7 @@ class Crypt
         //$unPadded = pkcs7_unpad($plaintext);
         //$unPadded = substr($plaintext, 32);
         $len = strlen($plaintext);
-        $pad = ord($plaintext[$len-1]);
+        $pad = ord($plaintext[$len - 1]);
         $unPadded = substr($plaintext, 0, strlen($plaintext) - $pad);
         $ouputFile = $inputFile . '.decrypted';
         $result = file_put_contents($ouputFile, $unPadded);

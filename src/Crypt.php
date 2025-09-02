@@ -8,8 +8,10 @@ declare(strict_types=1);
 namespace VandalorumRex\Crypt;
 
 use Exception;
+use VandalorumRex\Crypt\Decorator\KeyTypeInvalidDecorator;
 use VandalorumRex\Crypt\Model\Entity\Dto\MediaKeyExpanded;
 use VandalorumRex\Crypt\Model\Entity\Enum\MediaType;
+use VandalorumRex\Crypt\SimpleError;
 
 /**
  * Description of Crypt
@@ -28,8 +30,11 @@ class Crypt
      */
     public function hkdf(string $keyName, string $type): array|string
     {
+        $error = new SimpleError();
         if (!in_array($type, array_column(MediaType::cases(), 'value'))) {
-            return ['error' => Error::KEY_TYPE_INVALID];
+            //return ['error' => Error::KEY_TYPE_INVALID];
+            $error = new KeyTypeInvalidDecorator($error);
+            return ['error' => $error->getReasonPhrase()];
         }
         $keyPath = ROOT . '/keys/' . $keyName . '.key';
         if (file_exists($keyPath)) {

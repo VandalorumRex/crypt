@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-/*
+/**
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
  */
+
 namespace VandalorumRex\Crypt\Decorator;
 
 use Override;
@@ -13,13 +14,12 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use VandalorumRex\Crypt\Error;
 use VandalorumRex\Crypt\HttpCode;
-
 /**
- * Description of KeyTypeInvalidDecorator
+ * Description of FailedToCreateKeyDecorator
  *
  * @author Mansur
  */
-class KeyTypeInvalidDecorator implements ResponseInterface
+class FailedToCreateKeyDecorator implements ResponseInterface
 {
     protected ResponseInterface $error;
 
@@ -28,6 +28,7 @@ class KeyTypeInvalidDecorator implements ResponseInterface
      *
      * @param \Psr\Http\Message\ResponseInterface $error
      */
+    
     public function __construct(ResponseInterface $error)
     {
         $this->error = $error;
@@ -44,7 +45,7 @@ class KeyTypeInvalidDecorator implements ResponseInterface
     #[Override]
     public function getStatusCode(): int
     {
-        return HttpCode::BAD_REQUEST;
+        return HttpCode::UNPROCESSABLE_ENTITY;
     }
 
     /**
@@ -63,7 +64,7 @@ class KeyTypeInvalidDecorator implements ResponseInterface
     #[Override]
     public function getReasonPhrase(): string
     {
-        $result = Error::KEY_TYPE_INVALID;
+        $result = Error::FAILED_TO_CREATE_KEY;
 
         return !$this->error->getReasonPhrase() ? $result : $this->error->getReasonPhrase() . ', ' . $result;
     }
@@ -298,7 +299,6 @@ class KeyTypeInvalidDecorator implements ResponseInterface
      * @return static
      * @throws \InvalidArgumentException For invalid status code arguments.
      */
-    #[Override]
     public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface
     {
         return new static();

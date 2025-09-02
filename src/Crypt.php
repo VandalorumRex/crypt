@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace VandalorumRex\Crypt;
 
 use Exception;
+use VandalorumRex\Crypt\Decorator\FailedToCreateKeyDecorator;
 use VandalorumRex\Crypt\Decorator\KeyTypeInvalidDecorator;
 use VandalorumRex\Crypt\Model\Entity\Dto\MediaKeyExpanded;
 use VandalorumRex\Crypt\Model\Entity\Enum\MediaType;
@@ -32,8 +33,8 @@ class Crypt
     {
         $error = new SimpleError();
         if (!in_array($type, array_column(MediaType::cases(), 'value'))) {
-            //return ['error' => Error::KEY_TYPE_INVALID];
             $error = new KeyTypeInvalidDecorator($error);
+
             return ['error' => $error->getReasonPhrase()];
         }
         $keyPath = ROOT . '/keys/' . $keyName . '.key';
@@ -44,7 +45,9 @@ class Crypt
             file_put_contents(ROOT . '/keys/' . $keyName . '.key', $inputKey);
         }
         if (!$inputKey) {
-            return ['error' => Error::FAILED_TO_CREATE_KEY];
+            $error = new FailedToCreateKeyDecorator($error);
+
+            return ['error' => $error->getReasonPhrase()];
         }
         $salt = '';
         $mediaType = MediaType::from($type);
